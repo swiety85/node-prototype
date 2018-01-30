@@ -1,0 +1,33 @@
+{
+  "name": "node-prototype",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nf start",
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swiety85/node-prototype.git"
+  },
+  "author": "swiety85 <swiety85@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swiety85/node-prototype/issues"
+  },
+  "homepage": "https://github.com/swiety85/node-prototype#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cluster": "^0.7.7",
+    "express": "^4.16.2",
+    "foreman": "2.0.0",
+    "jsonwebtoken": "^8.1.1",
+    "mongoose": "^4.13.10",
+    "morgan": "^1.9.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.16.0"
+  }
+}
