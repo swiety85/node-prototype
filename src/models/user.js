@@ -1,6 +1,7 @@
 // get an instance of mongoose and mongoose.Schema
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
+const Rx = require('rxjs');
 const Schema = mongoose.Schema;
 
 const SALT_FACTOR = 12;
@@ -29,6 +30,19 @@ userSchema.pre('save', function(next) {
     });
 });
 
+
+userSchema.methods.comparePasswordObservable = function(candidatePassword) {
+    const password = this.password;
+
+    return Rx.Observable.create(function (observer) {
+        bcrypt.compare(candidatePassword, password, (err, isMatch) => {
+            if (err) observer.error(err);
+            else observer.next(isMatch);
+
+            observer.complete();
+        });
+    });
+};
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
         if (err) return cb(err);

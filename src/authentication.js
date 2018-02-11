@@ -1,6 +1,6 @@
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
-const crypto = require('crypto');
+// const crypto = require('crypto');
 const jwt = require('jwt-simple');
 
 const config = require('./../config');
@@ -20,7 +20,7 @@ const strategy = new passportJWT.Strategy(params, function(payload, done) {
                 id: user.id
             });
         } else {
-            return done(new Error("User not found"), null);
+            return done(new Error('User not found'), null);
         }
     });
 });
