@@ -1,13 +1,11 @@
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
-// const crypto = require('crypto');
 const jwt = require('jwt-simple');
 
-const config = require('./../config');
 const User = require('./models/user');
 
 const params = {
-    secretOrKey: config.jwtSecret,
+    secretOrKey: process.env.JWT_SECRET,
     jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken()
 };
 const strategy = new passportJWT.Strategy(params, function(payload, done) {
@@ -37,6 +35,6 @@ module.exports = {
     createToken: function (user) {
         return jwt.encode({
             id: user.id
-        }, config.jwtSecret);
+        }, process.env.JWT_SECRET);
     }
 };

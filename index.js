@@ -12,25 +12,19 @@ const bodyParser = require('body-parser');
 // (https://www.npmjs.com/package/morgan#predefined-formats)
 const morgan = require('morgan');
 
-const logger = require('./src/logger');
-
-const passport = require('passport');
 const mongoose = require('mongoose');
 
-const config = require('./config');
+// Basic logger with Winston which will allow us to set log level according to the environment
+// and also print the timestamp for every log.
+const logger = require('./src/logger');
 
-const port = process.env.PORT || 8000;
 const app = express();
 
-mongoose.connect(config.database, { useMongoClient: true });
+mongoose.connect(process.env.DATABASE, { useMongoClient: true });
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-
-
-
 
 
 
@@ -61,8 +55,9 @@ require('./src/routes/setup')(app);
 require('./src/routes/api')(app);
 
 
+const port = process.env.PORT || 8000;
 app.listen(port, () => {
     logger.info('Express server listening on %d, in %s mode', port, app.get('env'));
     // Here we send the ready signal to PM2
-    // process.send('ready');
+    process.send('ready');
 });
