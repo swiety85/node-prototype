@@ -2,7 +2,8 @@
 const express = require('express');
 
 // Body-parser extracts the entire body portion of an incoming request stream and exposes it
-// on req.body as something easier to interface with. It's not required, because you could do all of that yourself.
+// on req.body as something easier to interface with. It's not required,
+// because you could do all of that yourself.
 // However, it will most likely do what you want and save you the trouble.
 const bodyParser = require('body-parser');
 
@@ -12,21 +13,33 @@ const bodyParser = require('body-parser');
 // (https://www.npmjs.com/package/morgan#predefined-formats)
 const morgan = require('morgan');
 
+// Mongoose is one of best Mongo DB management library
 const mongoose = require('mongoose');
 
 // Basic logger with Winston which will allow us to set log level according to the environment
 // and also print the timestamp for every log.
 const logger = require('./src/logger');
 
-const app = express();
+const routes = require('./src/routes');
 
+const auth = require('./src/authentication');
+
+// establish connection to Mongo DB
 mongoose.connect(process.env.DATABASE, { useMongoClient: true });
 
+// create express app
+const app = express();
+
+// Express middleware to serve static files - everything in "public" folder.
 app.use(express.static('public'));
+
+// Express middleware to parse application/x-www-form-urlencoded request bodies
+// and populates it in request.body object as key-value pairs.
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Express middleware to parse application/json request bodies
+// and populates it in request.body object as key-value pairs.
 app.use(bodyParser.json());
-
-
 
 // We've used Morgan as a middleware twice. The reason is that we're using morgan
 // to separate our logs to two different write streams based on the status code.
@@ -41,23 +54,24 @@ app.use(morgan('dev', {
     skip: (req, res) => res.statusCode < 400,
     stream: process.stderr
 }));
-
 app.use(morgan('dev', {
     skip: (req, res) => res.statusCode >= 400,
     stream: process.stdout
 }));
 
+// Connect passport authentications
+app.use(auth.initialize());
+
+// Connect all our routes to the application
+app.use('/', routes);
 
 
-
-
-require('./src/routes/setup')(app);
-require('./src/routes/api')(app);
-
-
+// port under which application run
 const port = process.env.PORT || 8000;
+// start app
 app.listen(port, () => {
-    logger.info('Express server listening on %d, in %s mode', port, app.get('env'));
+    logger.info('Server listening on %d, in %s mode', port, app.get('env'));
+
     // Here we send the ready signal to PM2
     process.send('ready');
 });
