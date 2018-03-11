@@ -13,6 +13,10 @@ const bodyParser = require('body-parser');
 // (https://www.npmjs.com/package/morgan#predefined-formats)
 const morgan = require('morgan');
 
+// Helmet helps you secure your Express apps by setting various HTTP headers.
+// It's not a silver bullet, but it can help!
+const helmet = require('helmet');
+
 // Mongoose is one of best Mongo DB management library
 const mongoose = require('mongoose');
 
@@ -29,6 +33,17 @@ mongoose.connect(process.env.DATABASE, { useMongoClient: true });
 
 // create express app
 const app = express();
+
+// Helmet will include following middleware functions:
+// - dnsPrefetchControl controls browser DNS prefetching
+// - frameguard to prevent clickjacking
+// - hidePoweredBy to remove the X-Powered-By header
+// - hsts for HTTP Strict Transport Security
+// - ieNoOpen sets X-Download-Options for IE8+
+// - noSniff to keep clients from sniffing the MIME type
+// - xssFilter adds some small XSS protections
+// It's best to use Helmet early in your middleware stack so that its headers are sure to be set.
+app.use(helmet());
 
 // Express middleware to serve static files - everything in "public" folder.
 app.use(express.static('public'));

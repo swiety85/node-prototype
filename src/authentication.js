@@ -18,7 +18,7 @@ const strategy = new passportJWT.Strategy(params, function(payload, done) {
                 id: user.id
             });
         } else {
-            return done(new Error('User not found'), null);
+            return done(null, false);
         }
     });
 });
