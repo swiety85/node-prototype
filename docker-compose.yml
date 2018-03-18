@@ -1,0 +1,19 @@
+version: '3'
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/Users/Home/GitHub/node-prototype/src
+      - ./public:/Users/Home/GitHub/node-prototype/public
+    depends_on:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    volumes:
+      - /data/db
+    ports:
+      - "27017:27017"

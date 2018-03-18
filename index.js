@@ -30,6 +30,9 @@ const auth = require('./src/authentication');
 
 // establish connection to Mongo DB
 mongoose.connect(process.env.DATABASE, { useMongoClient: true });
+mongoose.connection.on('connected', console.info);
+mongoose.connection.on('error', console.error);
+mongoose.connection.on('disconnected', console.info);
 
 // create express app
 const app = express();
@@ -83,10 +86,16 @@ app.use('/', routes);
 
 // port under which application run
 const port = process.env.PORT || 8000;
+
+process.on('uncaughtException', (e) => {
+    console.error(e); // try console.log if that doesn't work
+    process.exit(10);
+});
+
 // start app
 app.listen(port, () => {
     logger.info('Server listening on %d, in %s mode', port, app.get('env'));
 
     // Here we send the ready signal to PM2
-    process.send('ready');
+    // process.send('ready');
 });

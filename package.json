@@ -1,7 +1,7 @@
 {
   "name": "node-prototype",
   "version": "0.1.0",
-  "description": "",
+  "description": "Node prototype",
   "main": "index.js",
   "scripts": {
     "start": "pm2 start ecosystem.config.js",
