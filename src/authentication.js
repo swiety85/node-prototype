@@ -6,7 +6,21 @@ const User = require('./models/user');
 
 const params = {
     secretOrKey: process.env.JWT_SECRET,
-    jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken()
+    jwtFromRequest: passportJWT.ExtractJwt.fromExtractors([(req) => {
+        if (!req.headers['cookie']) {
+            return null;
+        }
+
+        const jwt = req.headers['cookie'].split(';')
+            .filter((cookieString) => {
+                return cookieString.split('=')[0].trim() === 'jwt';
+            })
+            .map((cookieString) => {
+                return cookieString.split('=')[1].trim();
+            })[0];
+
+        return jwt;
+    }])
 };
 const strategy = new passportJWT.Strategy(params, function(payload, done) {
 

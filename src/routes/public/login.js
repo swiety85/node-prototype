@@ -1,12 +1,13 @@
 const Rx = require('rxjs');
+const User = require('./../../models/user');
+const auth = require('./../../authentication');
 
 module.exports = (req, res) => {
-
-    if (!req.body.name || !req.body.password) {
+    if (!req.body.email || !req.body.password) {
         return res.status(401).send('Invalid credentials');
     }
 
-    return Rx.Observable.fromPromise(User.findOne({ username: req.body.name }).exec())
+    return Rx.Observable.fromPromise(User.findOne({ email: req.body.email }).exec())
         .switchMap(function (user) {
             if (!user) {
                 res.sendStatus(401);
@@ -16,18 +17,21 @@ module.exports = (req, res) => {
                     .map(isPasswordValid => ({ user, isPasswordValid }));
             }
         })
-        .map((data) => {
+        .switchMap((data) => {
+            console.info('pass', data, data.isPasswordValid);
             if (data.isPasswordValid) {
-                return auth.createToken(data.user);
+                return Rx.Observable.of(auth.createToken(data.user));
             } else {
                 res.sendStatus(401);
                 return Rx.Observable.empty();
             }
         })
         .subscribe((token) => {
-            res.json({ token });
+            console.log('Token test: ', token);
+            res.cookie('jwt', token, { httpOnly: true });
+            res.json({ token: token+'' });
         }, (err) => {
-            res.send(err);
+            res.status(500).send(err);
         });
 };
 
