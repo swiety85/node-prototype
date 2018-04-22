@@ -3,7 +3,7 @@ module.exports = {
         {
             name: 'Node - Prototype',
             script: 'index.js',
-            // watch: true,
+            watch: ['src', 'public'],
             instances : 'max',
             exec_mode : 'cluster',
             env: {

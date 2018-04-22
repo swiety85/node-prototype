@@ -1,7 +1,7 @@
 // get user mongoose model
 const User = require('./../../models/user');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     const userData = {
         username: 'Damian Wajdlich',
         password: 'password',
@@ -9,12 +9,12 @@ module.exports = (req, res) => {
         isAdmin: true
     };
 
-    User.remove({}, function (err) {
-        if (err) return res.json({ success: false });
+    try {
+        await User.remove({});
+        await User.create(userData);
 
-        User.create(userData, function(err){
-            if (err) res.json({ success: false });
-            else res.json({ success: true });
-        });
-    });
+        res.json({ success: true });
+    } catch(err) {
+        res.send(err);
+    }
 };

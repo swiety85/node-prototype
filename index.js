@@ -87,6 +87,7 @@ app.use('/', routes);
 // port under which application run
 const port = process.env.PORT || 8000;
 
+// unhandled exception should restart app, because of unpredictable state after error
 process.on('uncaughtException', (e) => {
     console.error(e); // try console.log if that doesn't work
     process.exit(10);

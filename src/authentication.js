@@ -11,30 +11,22 @@ const params = {
             return null;
         }
 
-        const jwt = req.headers['cookie'].split(';')
-            .filter((cookieString) => {
-                return cookieString.split('=')[0].trim() === 'jwt';
-            })
-            .map((cookieString) => {
-                return cookieString.split('=')[1].trim();
-            })[0];
-
-        return jwt;
+        return getCookieValue(req, 'jwt');
     }])
 };
-const strategy = new passportJWT.Strategy(params, function(payload, done) {
+const strategy = new passportJWT.Strategy(params, async function(payload, done) {
 
-    User.findOne({ _id: payload.id }, (err, user) => {
-        if (err) {
-            return done(err, null);
-        } else if (user) {
-            return done(null, {
-                id: user.id
-            });
+    try {
+        const user = await User.findOne({ _id: payload.id }).exec();
+
+        if (user) {
+            done(null, { id: user.id });
         } else {
-            return done(null, false);
+            done(null, false);
         }
-    });
+    } catch(err) {
+        done(err, null);
+    }
 });
 
 module.exports = {
@@ -47,8 +39,16 @@ module.exports = {
         return passport.authenticate('jwt', { session: false });
     },
     createToken: function (user) {
-        return jwt.encode({
-            id: user.id
-        }, process.env.JWT_SECRET);
+        return jwt.encode({ id: user.id }, process.env.JWT_SECRET);
     }
 };
+
+function getCookieValue(req, key) {
+    return req.headers['cookie'].split(';')
+        .filter((cookieString) => {
+            return cookieString.split('=')[0].trim() === key;
+        })
+        .map((cookieString) => {
+            return cookieString.split('=')[1].trim();
+        })[0];
+}

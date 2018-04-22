@@ -18,6 +18,9 @@
   "bugs": {
     "url": "https://github.com/swiety85/node-prototype/issues"
   },
+  "engines": {
+    "node": ">8.0.0"
+  },
   "homepage": "https://github.com/swiety85/node-prototype#readme",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
