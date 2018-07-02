@@ -1,19 +1,40 @@
 version: '3'
 services:
   web:
-    build: .
-    restart: always
+    build:
+      # string containing a path to the build context
+      context: .
+    # Expose ports
     ports:
-      - "8000:8000"
+      - "80:8000"
     volumes:
-      - ./src:/Users/Home/GitHub/node-prototype/src
-      - ./public:/Users/Home/GitHub/node-prototype/public
-    depends_on:
+      - ./:/Users/damian-home/Documents/projects/node-prototype
+    links:
       - mongo
+    environment:
+      HTTP_TIMEOUT: 10000
+      PORT: 8000
+      NODE_ENV: 'development'
+      DATABASE: 'mongodb://mongo:27017/main'
+      JWT_SECRET: 'xisd3b4k5ds6vsfd'
+    deploy:
+      # Configures if and how to restart containers when they exit. 
+      restart_policy:
+        # One of none, on-failure or any (default: any).
+        condition: always
+    command: pm2-runtime start ecosystem.config.js
   mongo:
     container_name: mongo
     image: mongo:latest
     volumes:
-      - /data/db
-    ports:
-      - "27017:27017"
+      - ./data/db:/data/db
+    # Add environment variables
+    environment:
+      MONGO_DATA_DIR: /data/db
+      MONGO_LOG_DIR: /dev/null
+    deploy:
+      # Configures if and how to restart containers when they exit. 
+      restart_policy:
+        # One of none, on-failure or any (default: any).
+        condition: always
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
