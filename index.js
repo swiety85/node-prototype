@@ -17,9 +17,6 @@ const morgan = require('morgan');
 // It's not a silver bullet, but it can help!
 const helmet = require('helmet');
 
-// Mongoose is one of best Mongo DB management library
-const mongoose = require('mongoose');
-
 // Basic logger with Winston which will allow us to set log level according to the environment
 // and also print the timestamp for every log.
 const logger = require('./src/logger');
@@ -28,10 +25,7 @@ const routes = require('./src/routes');
 
 const auth = require('./src/authentication');
 
-// establish connection to Mongo DB
-const mongoseConnectPromise = mongoose.connect(process.env.DATABASE);
-mongoose.connection.on('connected', console.info);
-mongoose.connection.on('disconnected', console.info);
+const application = require('./app');
 
 // create express app
 const app = express();
@@ -82,62 +76,24 @@ app.use(auth.initialize());
 // Connect all our routes to the application
 app.use('/', routes);
 
-// port under which application run
-const port = process.env.PORT || 8000;
 
-// start app - wait for DB connection (greacefull start)
-const server = mongoseConnectPromise.then(() => {
-    return app.listen(port, () => {
-        logger.info('Server listening on %d, in %s mode', port, app.get('env'));
-    
-        // Here we send the ready signal to PM2
-        process.send ? process.send('ready') : null;
-    });
-}, err => console.error('DB error:', err));
-
-// unhandled exception should restart app, because of unpredictable state after error
-process.on('uncaughtException', (e) => {
-    console.error(e); // try console.log if that doesn't work
-    process.exit(10);
-});
-
-// event for greatfull shotdown
-process.on('SIGINT', () => { // (on pm2 stop)
-    console.info('SIGINT signal received.');
-    greatfullShotdown()
-        .catch(err => {
-            console.error(err);
-            process.exit(1);
-        })
-        .then(() => process.exit(0));
-});
-// event for greatfull shotdown
-process.on('message', (msg) => {
-    if (msg !== 'shutdown') {
-        return ;
-    }
-    greatfullShotdown()
-        .catch(err => {
-            console.error(err);
-            process.exit(1);
-        })
-        .then(() => process.exit(0));
-});
-
-// https://pm2.io/doc/en/runtime/best-practices/graceful-shutdown/
-function greatfullShotdown() {
-    return new Promise((resolve, reject) => {
-        // Stops the server from accepting new connections and finishes existing connections.
-        server.close((err) => {
-            if (err) {
-                console.error(err);
-                process.exit(1);
-                reject(err);
+application.start(app)
+    .then((server) => {
+        // unhandled exception should restart app, because of unpredictable state after error
+        process.on('uncaughtException', (e) => {
+            logger.error(e);
+            process.exit(10);
+        });
+        // event for greatfull shotdown
+        process.on('SIGINT', () => { // (on pm2 stop)
+            logger.info('SIGINT signal received.');
+            application.shutdown(server);
+        });
+        // event for greatfull shotdown
+        process.on('message', (msg) => {
+            if (msg !== 'shutdown') {
+                return ;
             }
-
-            // close your database connection and exit with success (0 code)
-            // for example with mongoose
-            return mongoose.connection.close().then(resolve, reject);
+            application.shutdown(server);
         });
     });
-}
