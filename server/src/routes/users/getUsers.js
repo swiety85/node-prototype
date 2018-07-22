@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
         const users = await User.find({}).exec();
 
         res.json(users);
-    } catch(err) {
+    } catch (err) {
         res.send(err);
     }
 };

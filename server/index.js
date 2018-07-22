@@ -46,7 +46,9 @@ app.use(express.static('public'));
 
 // Express middleware to parse application/x-www-form-urlencoded request bodies
 // and populates it in request.body object as key-value pairs.
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 
 // Express middleware to parse application/json request bodies
 // and populates it in request.body object as key-value pairs.
@@ -74,7 +76,7 @@ app.use(morgan('dev', {
 app.use(auth.initialize());
 
 // Connect all our routes to the application
-app.use('/', routes);
+app.use('/api', routes);
 
 
 application.start(app)
@@ -92,7 +94,7 @@ application.start(app)
         // event for greatfull shotdown
         process.on('message', (msg) => {
             if (msg !== 'shutdown') {
-                return ;
+                return;
             }
             application.shutdown(server);
         });

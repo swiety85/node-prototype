@@ -1,14 +1,22 @@
 version: '3'
 services:
-  web:
+  frontend:
+    container_name: frontend
     build:
       # string containing a path to the build context
-      context: .
+      context: ./frontend
+    # volumes:
+    #   - ./frontend:/var/www
+  web:
+    container_name: node_api
+    build:
+      # string containing a path to the build context
+      context: ./server
     # Expose ports
     ports:
-      - "80:8000"
+      - "8000:8000"
     volumes:
-      - ./:/Users/damian-home/Documents/projects/node-prototype
+      - ./server:/var/node-api
     links:
       - mongo
     environment:
@@ -22,7 +30,7 @@ services:
       restart_policy:
         # One of none, on-failure or any (default: any).
         condition: always
-    command: pm2-runtime start ecosystem.config.js
+    # command: pm2-runtime start ecosystem.config.js
   mongo:
     container_name: mongo
     image: mongo:latest
@@ -38,3 +46,18 @@ services:
         # One of none, on-failure or any (default: any).
         condition: always
     command: mongod --smallfiles --logpath=/dev/null # --quiet
+  server:
+    image: abiosoft/caddy
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    links:
+      - web
+      - frontend
+    volumes:
+      - "./Caddyfile:/etc/Caddyfile"
+      - "./frontend/dist:/srv"
+      - "./.caddy:/root/.caddy"

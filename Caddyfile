@@ -1,0 +1,7 @@
+localhost:8080
+gzip
+
+root ./
+
+proxy /api web:8000
+

@@ -64,3 +64,6 @@ typings/
 .idea/workspace.xml
 
 .idea/workspace.xml
+
+frontend/node_modules/
+server/node_modules/

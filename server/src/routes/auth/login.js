@@ -1,4 +1,3 @@
-const Rx = require('rxjs');
 const User = require('./../../models/user');
 const auth = require('./../../authentication');
 
@@ -65,18 +64,24 @@ module.exports = async (req, res) => {
             return res.status(401).send('Invalid credentials');
         }
 
-        const user = await User.findOne({ email: req.body.email }).exec();
+        const user = await User.findOne({
+            email: req.body.email
+        }).exec();
         const isPasswordValid = user && await user.comparePassword(req.body.password);
 
         if (isPasswordValid) {
             const token = auth.createToken(user);
 
-            res.cookie('jwt', token, { httpOnly: true });
-            res.json({ success: true });
+            res.cookie('jwt', token, {
+                httpOnly: true
+            });
+            res.json({
+                success: true
+            });
         } else {
             res.sendStatus(401);
         }
-    } catch(err) {
+    } catch (err) {
         res.send(err);
     }
 };
